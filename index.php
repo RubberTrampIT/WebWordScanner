@@ -14,11 +14,10 @@
 <br />  
 <div class="container">
     <div class="row">
-        <div class="col-lg-3">&nbsp;</div>
+        <div class="col-lg-3"><button class="btn btn-default" id="btnURLList">URL List</button></div>
         <div class="col-lg-3">
             <form id="searchForm">
                 <div class="form-group">
-                    <label for="searchWordLabel">Search Word:</label>
                     <input type="text" class="form-control" id="searchWord" placeholder="Enter word to search for...">
                 </div>
                 <input type="button" class="btn btn-default" id="btnSubmit" value="Search">
@@ -26,29 +25,52 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-lg-2">&nbsp;</div>
-        <div class="col-lg-4" id='displayResultsDiv'>
-
+        <div class="col-lg-3">&nbsp;</div>
+        <div class="col-lg-3" id="divLoadingGif">
+            <img src="includes/images/loading.gif">
+        </div>
+    </div>
+    <br><br>
+    <div class="row">
+        <div class="col-lg-1">&nbsp;</div>
+        <div class="col-lg-8" id='displayResultsDiv'>
+            
         </div>
     </div>
 </div>
 
  <script>
 $(document).ready(function() {
-    $("#btnSubmit").click(function(){        
+    $("#divLoadingGif").hide();
+
+    $("#btnURLList").click(function(e) {
+        e.preventDefault();
+        window.location.replace("./urlList.php");
+    })
+
+    $("#btnSubmit").click(function(e){   
+        e.preventDefault();     
+        $("#displayResultsDiv").hide();
+        $("#divLoadingGif").show();
         $.post("searchWord.php", 
         {searchWord: $("#searchWord").val()}, 
         function(data) {
-            $("#displayResultsDiv").text(data);
+            $("#divLoadingGif").hide();
+            $("#displayResultsDiv").html(data);
+            $("#displayResultsDiv").show();
         });
     });
     $('#searchWord').keypress(function (e) {
         if (e.which == 13 || e.which == 10) {
             e.preventDefault();
+            $("#displayResultsDiv").hide();
+            $("#divLoadingGif").show();
             $.post("searchWord.php", 
             {searchWord: $("#searchWord").val()}, 
             function(data) {
-                $("#displayResultsDiv").text(data);
+                $("#divLoadingGif").hide();
+                $("#displayResultsDiv").html(data);
+                $("#displayResultsDiv").show();
             });
         }
     });

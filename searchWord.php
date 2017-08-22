@@ -131,14 +131,18 @@ function displayResults ($searchWord) {
     $stmt->bind_param("s", $searchWord);
     $stmt->execute();
     $result = $stmt->get_result();
-
+    $string= "";
+    $string .= "<table class='table table-striped table-hover'>";
+    $string .= "<th>URL</th><th>Word Tested</th><th>Word Found</th><th>Word Count</th>";
     while($row = $result->fetch_assoc()){
-            $urlId= $row['url'];
+            $url= $row['url'];
             $wordTested = $row['wordTested'];
             $wordFound = $row['wordFound'];
             $wordCount = $row['wordCount'];
-            echo $urlId . " - " . $wordTested . " - " . $wordFound . " - " . $wordCount . "\n\n";
+            $string .= "<tr><td>".$url."</td><td>".$wordTested."</td><td>".$wordFound."</td><td>".$wordCount."</td></tr>";
     }
+    $string .= "</table>";
+    echo $string;
 }
 
 
