@@ -4,10 +4,9 @@
 ## Debugging ONLY
 error_reporting( E_ALL );
 // ini_set("display_error", "OFF");
-// $searchWord = "bitcoin";
+$searchWord = "bitcoin";
 
-
-require("includes/php/simple_html_dom.php");
+// require("includes/php/simple_html_dom.php");
 
 if (!empty($_POST["searchWord"])) {
     $searchWord = $_POST["searchWord"];
@@ -26,6 +25,21 @@ if (!empty($_POST["searchWord"])) {
     displayResults($searchWord);
     
 } else {
+    ## For debugging ONLY
+    $searchWord = "bitcoin";
+    
+    // $url = "https://www.coindesk.com/bitcoin-trading-sideways-bitcoin-cash-drops-800/";
+    $urls = getURLS();
+    //$urls = array("https://www.coindesk.com/bitcoin-trading-sideways-bitcoin-cash-drops-800/", "https://cointelegraph.com/news/btccom-launches-recovery-tool-to-get-your-trapped-bitcoin-cash", "https://www.cryptocoinsnews.com/gatecoin-bitcoin-to-reach-5000-this-year/");
+
+    foreach ($urls as $urlWithId) {
+        $components = explode(" ", $urlWithId);
+
+        $urlId = $components[0];
+        $url = $components[1];
+        searchPage($searchWord, $urlId, $url);
+    }
+    displayResults($searchWord);
 }
 
 function searchPage($searchWord, $urlId, $url) {
@@ -45,19 +59,32 @@ function searchPage($searchWord, $urlId, $url) {
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
     if ($html = curl_exec($ch)) {
-        $dom = new DOMDocument();
-    // @$dom->loadHTML($url);
+        $doc = new DOMDocument();
+        $internalErrors = libxml_use_internal_errors(true);
+        $doc->loadHTML($html);
+        libxml_use_internal_errors($internalErrors);
+        $root = $doc->documentElement;
+
+        $text = '';
+
+        foreach($root->childNodes as $childNode) {
+            $text .= $doc->saveHTML($childNode);
+        }
 
         if (!curl_errno($ch)) {
-            try {
-                $text = file_get_html($url)->plaintext;
-            } catch (Exception $e) {
-                curl_close($ch);
-                return false;
-            }
+            // try {
+            //     if($text = file_get_html($url)->plaintext) {
+            //         $text = file_get_html($url)->plaintext;
+            //     } else {
+            //         throw new Exception('Couldn\'t Parse Website.');
+            //     }
+            // } catch (Exception $e) {
+            //     curl_close($ch);
+            //     return false;
+            // }
 
             if ($text) {
-                if (preg_match_all('/\s'.$searchWord.'\s/', $text, $matches)) {
+                if (preg_match_all('/\s'.$searchWord.'\s/i', $text, $matches)) {
                     $numMatches = count($matches[0]);
                     updateResultsDB($urlId,$searchWord,'True',$numMatches);
                 } else {
@@ -132,7 +159,7 @@ function displayResults ($searchWord) {
     $stmt->execute();
     $result = $stmt->get_result();
     $string= "";
-    $string .= "<table class='table table-striped table-hover'>";
+    $string .= "<table class='table table-striped table-hover' id='tblDisplayResults'>";
     $string .= "<th>URL</th><th>Word Tested</th><th>Word Found</th><th>Word Count</th>";
     while($row = $result->fetch_assoc()){
             $url= $row['url'];

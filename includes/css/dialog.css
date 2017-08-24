@@ -50,11 +50,25 @@ border-radius:5px;
 margin-left:33%;
 cursor:pointer
 }
+
+#saveURL, #deleteURL {
+width:30%;
+border:1px solid #59b4d4;
+background-color:#0078a3;
+color:#eee;
+padding:3px 0;
+border-radius:5px;
+margin-left:5%;
+cursor:pointer;
+position: relative;
+}
+
 input[type=submit]:hover {
 border:1px solid #666;
 background-color:#555;
 color:#fff
 }
+
 .ui-dialog .ui-dialog-content {
 padding:2em;
 display: inline-block;

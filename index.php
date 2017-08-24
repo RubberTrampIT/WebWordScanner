@@ -57,8 +57,13 @@ $(document).ready(function() {
         function(data) {
             $("#divLoadingGif").hide();
             $("#displayResultsDiv").html(data);
+        })
+        .done(function() {
             $("#displayResultsDiv").show();
-        });
+        })
+        .fail(function() {
+            alert("Search Failed.  Please Try Again Later.");
+        })
     });
     $('#searchWord').keypress(function (e) {
         if (e.which == 13 || e.which == 10) {
@@ -70,10 +75,16 @@ $(document).ready(function() {
             function(data) {
                 $("#divLoadingGif").hide();
                 $("#displayResultsDiv").html(data);
+            })
+            .done(function() {
                 $("#displayResultsDiv").show();
+            })
+            .fail(function() {
+                alert("Search Failed.  Please Try Again Later.");
             });
         }
     });
+
 });
 
 </script>

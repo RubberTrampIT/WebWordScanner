@@ -14,6 +14,8 @@ function addURL ($url) {
         exit();
     }
 
+    $url = strtolower($url);
+
     $stmt = $mysqli->prepare("INSERT INTO urls (`url`) VALUES (?)");
     $stmt->bind_param('s', $url);
     $stmt->execute();

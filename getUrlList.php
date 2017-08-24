@@ -3,7 +3,7 @@
 $array = getURLS();
 
 if (count($array) > 0) {
-    $string = "<table class='table table-striped table-hover'>";
+    $string = "<table class='table table-striped table-hover' id='urlTable'>";
     $string .= "<th>URL</th>";
 }
 foreach ($array as $urlFull) {
@@ -11,8 +11,7 @@ foreach ($array as $urlFull) {
 
     $urlId = $components[0];
     $url = $components[1];
-    $string .= "<tr><td><input type='hidden' id='urlId' value=".$urlId.">".$url."</td></tr>";
-    // echo "<input type='hidden' id='urlId' value=" . $urlId . ">" . $url . "<br>";
+    $string .= "<tr><td><input type='button' id=$urlId class='btnURL btn btn-default' style='width: 100%; text-align: left' data-id='#dialogModify' value=".$url."></td></tr>";
 }
 
 $string .= "</table>";
@@ -28,7 +27,7 @@ function getURLS() {
         exit();
     }
 
-    if ($sql = "SELECT id, url  FROM urls") {
+    if ($sql = "SELECT id, url  FROM urls ORDER BY url DESC") {
         if(!$result = $mysqli->query($sql)){
             die('There was an error running the query [' . $mysqli->error . ']');
         }

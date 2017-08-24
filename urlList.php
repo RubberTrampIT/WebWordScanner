@@ -13,11 +13,23 @@
 <body>
 
 <div class="main" style="display: none;">
-    <div id="dialog" title="Add URL">
+    <div id="dialogAdd" class="dialog" title="Add URL">
         <form action="" method="post" id="addURLForm">
             <label>URL:</label>
-            <input id="txtURL" name="txtURL" type="text">
-            <input id="submit" type="submit" value="Submit">
+            <input id="txtURL" name="txtURLAdd" type="text">
+            <input id="submitAddURL" type="submit" value="Submit">
+        </form>
+    </div>
+</div> 
+ 
+<div class="main" style="display: none;">
+    <div id="dialogModify" class="dialog" title="Modify/Delete URL">
+        <form action="" method="post" id="modifyURLForm">
+            <label>URL:</label>
+            <input id="hiddenURLId" type="hidden">
+            <input id="txtURLModify" name="txtURL" type="text" value="">
+            <input id="saveURL" type="submit" class="btn btn-default" value="Save">
+            <input id="deleteURL" type="button" class="btn btn-default" value="Delete">
         </form>
     </div>
 </div> 
@@ -28,8 +40,7 @@
 <div class="container">
     <div class="row">
         <div class="col-lg-3"><button class="btn btn-default" id="btnWordSearch">Word Search</button></div>
-        <div class="col-lg-4"><button class="btn btn-default" id="btnAddURL">Add URL</button>&nbsp;&nbsp;
-        <button class="btn btn-default" id="btnModifyDelete">Modify/Delete URL</button></div>
+        <div class="col-lg-4"><button class="btn btn-default" id="btnAddURL" data-id="#dialogAdd">Add URL</button>&nbsp;&nbsp;
     </div>
     <div class="row">
         <div class="col-lg-3">&nbsp;</div>
