@@ -2,8 +2,19 @@
 $(document).ready(function() {
     $(function() {
         $(".dialog").dialog({
-            autoOpen: false
+            height: 250,
+            width: 400,
+            modal: false,
+            autoOpen: false,
+            closeText: "X",
+            draggable: true,
+            resizable: true,
+            // position: { my: "center", at: "center", of: window }
         });
+
+        $(".ui-icon-closethick").hide();
+
+        
 
         $("#btnAddURL").click(function() {
             var id = $(this).data('id');
@@ -38,7 +49,7 @@ $(document).ready(function() {
                     $("#divLoadingGif").hide();
                 })
                 .done(function() {
-                    alert("URL Updated Successfully");
+                    // alert("URL Updated Successfully");
                     window.location.reload();
                 })
                 .fail(function(){
@@ -55,13 +66,18 @@ $(document).ready(function() {
                 $("#divLoadingGif").hide();
             })
             .done(function() {
-                alert("URL Deleted Successfully");
+                // alert("URL Deleted Successfully");
                 window.location.reload();
             })
             .fail(function(){
                 alert("Error deleting URL.  Please Try Again Later.");
             });
         });
+
+        $("#btnBulkAdd").click(function(e) {
+            $(".dialog").dialog("close");
+            $("#dialogBulkAdd").dialog("open");
+        })
     });
 
     $("#submitAddURL").click(function(e) {
@@ -88,31 +104,3 @@ $(document).ready(function() {
         }
     });
 });
-
-    // Validating Form Fields.....
-
-    
-
- 
-
-    // $("#btnURL").click(function(e) {
-    //     var url = $("#txtURL").val();
-    //     var urlReg = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
-    //     if (url === '') {
-    //         alert("Please fill all fields.");
-    //         e.preventDefault();
-    //     } else if (!(url).match(urlReg)) {
-    //         alert("Invalid URL.");
-    //         e.preventDefault();
-    //     } else {
-    //         $("#dialogModify").dialog("close");
-    //         $.post("addUrl.php", 
-    //         {txtURL: $("#txtURL").val()}, 
-    //         function(data) {
-    //             $("#divLoadingGif").hide();
-    //             alert(data);
-    //         });
-    //         window.location.reload();
-    //     }
-    // });
-// });

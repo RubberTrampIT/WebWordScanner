@@ -51,7 +51,7 @@ margin-left:33%;
 cursor:pointer
 }
 
-#saveURL, #deleteURL {
+#saveURL, #deleteURL, #btnBulkAdd {
 width:30%;
 border:1px solid #59b4d4;
 background-color:#0078a3;
@@ -63,6 +63,12 @@ cursor:pointer;
 position: relative;
 }
 
+#saveURL:hover, #deleteURL:hover, #btnBulkAdd:hover {
+border:1px solid #666;
+background-color:#555;
+color:#fff
+}
+
 input[type=submit]:hover {
 border:1px solid #666;
 background-color:#555;
@@ -70,8 +76,7 @@ color:#fff
 }
 
 .ui-dialog .ui-dialog-content {
-padding:2em;
-display: inline-block;
+ padding:2em; 
 }
 
 div.main {
@@ -85,4 +90,8 @@ box-shadow:0 0 10px;
 border-radius:2px;
 font-size:13px;
 text-align:center
+}
+
+.ui-dialog .ui-dialog-titlebar-close span {
+    margin: -6px;
 }

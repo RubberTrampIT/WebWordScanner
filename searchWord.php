@@ -4,7 +4,6 @@
 ## Debugging ONLY
 error_reporting( E_ALL );
 // ini_set("display_error", "OFF");
-$searchWord = "bitcoin";
 
 // require("includes/php/simple_html_dom.php");
 
@@ -43,9 +42,65 @@ if (!empty($_POST["searchWord"])) {
 }
 
 function searchPage($searchWord, $urlId, $url) {
-    $ch = curl_init();
+    if (remoteURLExists($url)) {
+        $ch = curl_init();
+        $user_agent='Mozilla/5.0 (Windows NT 6.1; rv:8.0) Gecko/20100101 Firefox/8.0';
+        $timeout = 10;
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_AUTOREFERER, false);
+        curl_setopt($ch, CURLOPT_VERBOSE, 1);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+
+        curl_setopt($ch, CURLOPT_USERAGENT, $user_agent);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_SSLVERSION,CURL_SSLVERSION_DEFAULT);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+        if ($html = curl_exec($ch)) {
+            $doc = new DOMDocument();
+            $internalErrors = libxml_use_internal_errors(true);
+            $doc->loadHTML($html);
+            libxml_use_internal_errors($internalErrors);
+            $root = $doc->documentElement;
+
+            $text = '';
+
+            foreach($root->childNodes as $childNode) {
+                $text .= $doc->saveHTML($childNode);
+            }
+
+            if (!curl_errno($ch)) {
+                if ($text) {
+                    if (preg_match_all('/\s'.$searchWord.'\s/i', $text, $matches)) {
+                        $numMatches = count($matches[0]);
+                        updateResultsDB($urlId,$searchWord,'True',$numMatches);
+                    } else {
+                        $numMatches = 0;
+                        updateResultsDB($urlId,$searchWord,'False',$numMatches);
+                    }
+                } else {
+                    $numMatches = NULL;
+                    updateResultsDB($urlId,$searchWord,'Failed',$numMatches);
+                }
+            } else {
+                updateResultsDB($urlId,$searchWord,'Failed',$numMatches);
+            }
+            curl_close($ch);
+        } else {
+            // echo "Error";
+        }
+    } else {
+        updateFailedResultsDB ($urlId,$searchWord,'Failed');
+    }
+    
+}
+
+function remoteURLExists($url) {
+    $ch = curl_init($url);
     $user_agent='Mozilla/5.0 (Windows NT 6.1; rv:8.0) Gecko/20100101 Firefox/8.0';
-    $timeout = 10;
+        // $timeout = 10;
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
     curl_setopt($ch, CURLOPT_AUTOREFERER, false);
@@ -57,51 +112,29 @@ function searchPage($searchWord, $urlId, $url) {
     curl_setopt($ch, CURLOPT_SSLVERSION,CURL_SSLVERSION_DEFAULT);
     curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
-    if ($html = curl_exec($ch)) {
-        $doc = new DOMDocument();
-        $internalErrors = libxml_use_internal_errors(true);
-        $doc->loadHTML($html);
-        libxml_use_internal_errors($internalErrors);
-        $root = $doc->documentElement;
+    // curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+    //don't fetch the actual page, you only want to check the connection is ok
+    curl_setopt($ch, CURLOPT_NOBODY, true);
 
-        $text = '';
+    //do request
+    $result = curl_exec($ch);
 
-        foreach($root->childNodes as $childNode) {
-            $text .= $doc->saveHTML($childNode);
+    $ret = false;
+
+    //if request did not fail
+    if ($result !== false) {
+        //if request was ok, check response code
+        $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);  
+
+        if ($statusCode == 200) {
+            $ret = true;  
         }
-
-        if (!curl_errno($ch)) {
-            // try {
-            //     if($text = file_get_html($url)->plaintext) {
-            //         $text = file_get_html($url)->plaintext;
-            //     } else {
-            //         throw new Exception('Couldn\'t Parse Website.');
-            //     }
-            // } catch (Exception $e) {
-            //     curl_close($ch);
-            //     return false;
-            // }
-
-            if ($text) {
-                if (preg_match_all('/\s'.$searchWord.'\s/i', $text, $matches)) {
-                    $numMatches = count($matches[0]);
-                    updateResultsDB($urlId,$searchWord,'True',$numMatches);
-                } else {
-                    $numMatches = 0;
-                    updateResultsDB($urlId,$searchWord,'False',$numMatches);
-                }
-            } else {
-                $numMatches = NULL;
-                updateResultsDB($urlId,$searchWord,'Failed',$numMatches);
-            }
-        } else {
-            updateResultsDB($urlId,$searchWord,'Failed',$numMatches);
-        }
-        curl_close($ch);
     } else {
-        echo "Error";
     }
+
+    curl_close($ch);
+
+    return $ret;
 }
 
 function getURLS() {
@@ -142,6 +175,20 @@ function updateResultsDB ($urlId,$searchWord,$matchFound,$numMatches) {
 
     $stmt = $mysqli->prepare("INSERT INTO results (`urlId`,`wordTested`,`wordFound`,`wordCount`) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE wordTested=?, wordFound=?, wordCount=?");
     $stmt->bind_param('sssssss', $urlId, $searchWord, $matchFound, $numMatches, $searchWord, $matchFound, $numMatches);
+    $stmt->execute();
+
+}
+
+function updateFailedResultsDB ($urlId,$searchWord,$matchFound) {
+    $mysqli = new mysqli('127.0.0.1', 'root', 'root', 'webwordscanner');
+    if ($mysqli->connect_errno) {
+        echo "Errno: " . $mysqli->connect_errno . "\n";
+        echo "Error: " . $mysqli->connect_error . "\n";
+        exit();
+    }
+
+    $stmt = $mysqli->prepare("INSERT INTO results (`urlId`,`wordTested`,`wordFound`) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE wordTested=?, wordFound=?");
+    $stmt->bind_param('sssss', $urlId, $searchWord, $matchFound, $searchWord, $matchFound);
     $stmt->execute();
 
 }
