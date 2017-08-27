@@ -23,6 +23,14 @@
                 <input type="button" class="btn btn-default" id="btnSubmit" value="Search">
             </form> 
         </div>
+        <div class="col-lg-3">
+            <form id="searchBingForm">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="txtSearchBing" placeholder="Query Bing News Articles">
+                </div>
+                <input type="button" class="btn btn-default" id="btnSubmitBingSearch" value="Search Bing News">
+            </form> 
+        </div>
     </div>
     <div class="row">
         <div class="col-lg-3">&nbsp;</div>
@@ -83,6 +91,44 @@ $(document).ready(function() {
                 alert("Search Failed.  Please Try Again Later.");
             });
         }
+    });
+
+    $('#txtSearchBing').keypress(function (e) {
+        if (e.which == 13 || e.which == 10) {
+            e.preventDefault();
+            // $("#displayResultsDiv").hide();
+            $("#divLoadingGif").show();
+            $.post("queryBing.php", 
+            {searchWord: $("#txtSearchBing").val()}, 
+            function(data) {
+                $("#divLoadingGif").hide();
+                $("#displayResultsDiv").html(data);
+            })
+            .done(function() {
+                $("#displayResultsDiv").show();
+            })
+            .fail(function() {
+                alert("Search Failed.  Please Try Again Later.");
+            });
+        }
+    });
+
+    $('#btnSubmitBingSearch').click(function (e) {
+            e.preventDefault();
+            // $("#displayResultsDiv").hide();
+            $("#divLoadingGif").show();
+            $.post("queryBing.php", 
+            {searchWord: $("#txtSearchBing").val()}, 
+            function(data) {
+                $("#divLoadingGif").hide();
+                $("#displayResultsDiv").html(data);
+            })
+            .done(function() {
+                $("#displayResultsDiv").show();
+            })
+            .fail(function() {
+                alert("Search Failed.  Please Try Again Later.");
+            });
     });
 
 });
