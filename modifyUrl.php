@@ -1,5 +1,5 @@
 <?php
-if (!empty($_POST["txtURL"])) {
+if (isset($_POST["txtURL"])) {
     $url = $_POST["txtURL"];
     $urlId = $_POST["urlId"];
     // echo $urlId.": ".$url;

@@ -122,6 +122,9 @@ $(document).ready(function() {
                 $("#divLoadingGif").hide();
                 alert("Search Failed.  Please Try Again Later.");
             });
+            // .always(function() {
+            //     getResultsWhenFail(searchWord);
+            // });
         }
     });
 

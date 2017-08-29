@@ -1,6 +1,6 @@
 <?php
 
-if (!empty($_POST["txtURL"])) {
+if (isset($_POST["txtURL"])) {
     $url = $_POST["txtURL"];
 }
 

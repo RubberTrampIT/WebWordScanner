@@ -7,7 +7,7 @@ error_reporting( E_ALL );
 
 // require("includes/php/simple_html_dom.php");
 
-if (!empty($_POST["searchWord"])) {
+if (isset($_POST["searchWord"])) {
     $searchWord = $_POST["searchWord"];
     
     // $url = "https://www.coindesk.com/bitcoin-trading-sideways-bitcoin-cash-drops-800/";
@@ -45,7 +45,7 @@ function searchPage($searchWord, $urlId, $url) {
     if (remoteURLExists($url)) {
         $ch = curl_init();
         $user_agent='Mozilla/5.0 (Windows NT 6.1; rv:8.0) Gecko/20100101 Firefox/8.0';
-        $timeout = 10;
+        // $timeout = 10;
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_AUTOREFERER, false);
@@ -57,7 +57,7 @@ function searchPage($searchWord, $urlId, $url) {
         curl_setopt($ch, CURLOPT_SSLVERSION,CURL_SSLVERSION_DEFAULT);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+        curl_setopt($ch, CURLOPT_TIMEOUT_MS, 60000);
         if ($html = curl_exec($ch)) {
             $doc = new DOMDocument();
             $internalErrors = libxml_use_internal_errors(true);
@@ -84,15 +84,17 @@ function searchPage($searchWord, $urlId, $url) {
                     $numMatches = NULL;
                     updateResultsDB($urlId,$searchWord,'Failed',$numMatches);
                 }
+            } elseif (curl_errno($ch) == 28) {
+                updateResultsDB($urlId,$searchWord,'Timed Out',$numMatches);
             } else {
-                updateResultsDB($urlId,$searchWord,'Failed',$numMatches);
+                updateResultsDB($urlId,$searchWord,'Failed: '.curl_errno($ch),$numMatches);
             }
             curl_close($ch);
         } else {
             // echo "Error";
         }
     } else {
-        updateFailedResultsDB ($urlId,$searchWord,'Failed');
+        updateFailedResultsDB ($urlId,$searchWord,'cURL Failed To Reach URL');
     }
     
 }
@@ -112,6 +114,7 @@ function remoteURLExists($url) {
     curl_setopt($ch, CURLOPT_SSLVERSION,CURL_SSLVERSION_DEFAULT);
     curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_TIMEOUT_MS, 60000);
     // curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
     //don't fetch the actual page, you only want to check the connection is ok
     curl_setopt($ch, CURLOPT_NOBODY, true);
@@ -121,16 +124,21 @@ function remoteURLExists($url) {
 
     $ret = false;
 
-    //if request did not fail
-    if ($result !== false) {
-        //if request was ok, check response code
-        $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);  
+    if (!curl_errno($ch)) {
+        if ($result !== false) {
+            //if request was ok, check response code
+            $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);  
 
-        if ($statusCode == 200) {
-            $ret = true;  
+            if ($statusCode == 200) {
+                $ret = true;  
+            }
+        } else {
         }
     } else {
+        $ret = false;
     }
+    //if request did not fail
+    
 
     curl_close($ch);
 

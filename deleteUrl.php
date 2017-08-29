@@ -1,5 +1,5 @@
 <?php
-if (!empty($_POST["urlId"])) {
+if (isset($_POST["urlId"])) {
     $urlId = $_POST["urlId"];
     // echo $urlId.": ".$url;
     deleteURL($urlId);

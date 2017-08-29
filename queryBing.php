@@ -1,5 +1,5 @@
 <?php
-    if (!empty($_POST["searchWord"])) {
+    if (isset($_POST["searchWord"])) {
         $query = $_POST["searchWord"];
     } else {
         $query = "bitcoin";

@@ -1,5 +1,5 @@
 <?php
-
+// Todo: Add isset
 $fp = fopen($_FILES['file']['tmp_name'], 'rb');
 while ( ($line = fgets($fp)) !== false) {
     // if ($line) {
