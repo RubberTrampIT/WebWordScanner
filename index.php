@@ -98,16 +98,28 @@ $(document).ready(function() {
             e.preventDefault();
             // $("#displayResultsDiv").hide();
             $("#divLoadingGif").show();
+            var searchWord = $("#txtSearchBing").val();
             $.post("queryBing.php", 
-            {searchWord: $("#txtSearchBing").val()}, 
+            {searchWord: searchWord}, 
             function(data) {
-                $("#divLoadingGif").hide();
-                $("#displayResultsDiv").html(data);
+                // $.post("searchWord.php",
+                // {searchWord: searchWord},
+                // function(data) {
+                //     $("#divLoadingGif").hide();
+                //     $("#displayResultsDiv").html(data);
+                // })
             })
             .done(function() {
+                $.post("searchWord.php",
+                {searchWord: searchWord},
+                function(data) {
+                    $("#divLoadingGif").hide();
+                    $("#displayResultsDiv").html(data);
+                })
                 $("#displayResultsDiv").show();
             })
             .fail(function() {
+                $("#divLoadingGif").hide();
                 alert("Search Failed.  Please Try Again Later.");
             });
         }
@@ -117,13 +129,19 @@ $(document).ready(function() {
             e.preventDefault();
             // $("#displayResultsDiv").hide();
             $("#divLoadingGif").show();
+            var searchWord = $("#txtSearchBing").val();
             $.post("queryBing.php", 
-            {searchWord: $("#txtSearchBing").val()}, 
+            {searchWord: searchWord}, 
             function(data) {
-                $("#divLoadingGif").hide();
-                $("#displayResultsDiv").html(data);
+                $.post("searchWord.php",
+                {searchWord: searchWord},
+                function(data) {
+                    $("#divLoadingGif").hide();
+                    $("#displayResultsDiv").html(data);
+                })
             })
             .done(function() {
+                
                 $("#displayResultsDiv").show();
             })
             .fail(function() {

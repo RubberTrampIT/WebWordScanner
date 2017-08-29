@@ -11,7 +11,7 @@ if (!empty($_POST["searchWord"])) {
     $searchWord = $_POST["searchWord"];
     
     // $url = "https://www.coindesk.com/bitcoin-trading-sideways-bitcoin-cash-drops-800/";
-    $urls = getURLS();
+    $urls = getURLS($searchWord);
     //$urls = array("https://www.coindesk.com/bitcoin-trading-sideways-bitcoin-cash-drops-800/", "https://cointelegraph.com/news/btccom-launches-recovery-tool-to-get-your-trapped-bitcoin-cash", "https://www.cryptocoinsnews.com/gatecoin-bitcoin-to-reach-5000-this-year/");
 
     foreach ($urls as $urlWithId) {
@@ -28,7 +28,7 @@ if (!empty($_POST["searchWord"])) {
     $searchWord = "bitcoin";
     
     // $url = "https://www.coindesk.com/bitcoin-trading-sideways-bitcoin-cash-drops-800/";
-    $urls = getURLS();
+    $urls = getURLS($searchWord);
     //$urls = array("https://www.coindesk.com/bitcoin-trading-sideways-bitcoin-cash-drops-800/", "https://cointelegraph.com/news/btccom-launches-recovery-tool-to-get-your-trapped-bitcoin-cash", "https://www.cryptocoinsnews.com/gatecoin-bitcoin-to-reach-5000-this-year/");
 
     foreach ($urls as $urlWithId) {
@@ -137,7 +137,7 @@ function remoteURLExists($url) {
     return $ret;
 }
 
-function getURLS() {
+function getURLS($searchWord) {
     $array = array();
     $mysqli = new mysqli('127.0.0.1', 'root', 'root', 'webwordscanner');
 
@@ -147,19 +147,22 @@ function getURLS() {
         exit();
     }
 
-    if ($sql = "SELECT id, url  FROM urls") {
-        if(!$result = $mysqli->query($sql)){
-            die('There was an error running the query [' . $mysqli->error . ']');
-        }
-
-        while($row = $result->fetch_assoc()){
-            $id = $row['id'];
-            $url = $row['url'];
-            $string = $id . " " . $url;
-            array_push($array, $string);
-        }
-    
+    // if ($sql = "SELECT id, url  FROM urls WHERE searchTerm=?") {
+    //     if(!$result = $mysqli->query($sql)){
+    //         die('There was an error running the query [' . $mysqli->error . ']');
+    //     }
+    $stmt = $mysqli->prepare("SELECT id, url  FROM urls WHERE searchTerm=?");
+    $stmt->bind_param('s', $searchWord);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while($row = $result->fetch_assoc()){
+        $id = $row['id'];
+        $url = $row['url'];
+        $string = $id . " " . $url;
+        array_push($array, $string);
     }
+    
+    
     if (count($array) > 0) {
         return $array;
     }
